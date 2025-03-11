@@ -1,0 +1,149 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 97%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 97%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 97%;
+
+    --primary: 142 70% 45%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 97%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 142 70% 45%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 97%;
+
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 142 70% 45%;
+
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border selection:bg-accent/10 selection:text-accent;
+  }
+  
+  html {
+    @apply scroll-smooth;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+  
+  body {
+    @apply bg-cyrus-background text-cyrus-text antialiased;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-cyrus-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cyrus-border rounded-full transition-all;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-cyrus-accent/30;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-cyrus-card/60 backdrop-blur-xl backdrop-saturate-150 border border-white/5;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-cyrus-accent/90 to-sky-400 bg-clip-text text-transparent;
+  }
+}
+
+@layer components {
+  .cyrus-input {
+    @apply h-10 rounded-md border border-cyrus-border bg-cyrus-card/80 px-3 py-2 text-sm text-cyrus-text transition-colors placeholder:text-cyrus-textSecondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyrus-accent/50;
+  }
+  
+  .cyrus-button {
+    @apply inline-flex h-10 items-center justify-center rounded-md bg-cyrus-accent/90 px-4 py-2 text-sm font-medium text-black transition-all duration-300 hover:bg-cyrus-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyrus-accent/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .cyrus-button-secondary {
+    @apply inline-flex h-10 items-center justify-center rounded-md border border-cyrus-border/50 bg-transparent px-4 py-2 text-sm font-medium text-cyrus-text transition-all duration-300 hover:bg-cyrus-card/60 hover:border-cyrus-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyrus-accent/50 disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .cyrus-button-danger {
+    @apply inline-flex h-10 items-center justify-center rounded-md bg-cyrus-danger/90 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-cyrus-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyrus-danger/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .cyrus-card {
+    @apply rounded-xl border border-cyrus-border/50 bg-cyrus-card/80 p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-cyrus-border/70;
+  }
+  
+  .shimmer {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-shine;
+  }
+
+  /* New animation classes */
+  .fade-in {
+    @apply opacity-0 animate-fadeIn;
+  }
+  
+  .slide-in {
+    @apply transform translate-y-4 opacity-0;
+    animation: slideInUp 0.5s ease forwards;
+  }
+  
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  .hover-glow:hover {
+    @apply shadow-[0_0_15px_rgba(0,230,118,0.3)];
+  }
+}
+
+/* Custom animations */
+@keyframes slideInUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(0, 230, 118, 0.3);
+  }
+}
