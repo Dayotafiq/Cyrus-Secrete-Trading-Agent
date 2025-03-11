@@ -1,1 +1,1 @@
-# Cyrus-Secrete-Trading-Agent
+# Cyrus-Secret-Trading-Agent
