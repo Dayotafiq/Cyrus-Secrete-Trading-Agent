@@ -4,6 +4,7 @@ import logging
 import json
 from config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 import bcrypt
+from datetime import datetime
 
 logging.basicConfig(filename="cosmos_trading_agent.log", level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,16 +28,16 @@ def create_user(wallet_address, wallet_seed, total_capital, default_indicators=N
                     return None
                 hashed_seed = bcrypt.hashpw(wallet_seed.encode('utf-8'), bcrypt.gensalt())
                 cur.execute(
-                    "INSERT INTO users (wallet_address, wallet_seed, total_capital, indicators, weights) "
-                    "VALUES (%s, %s, %s, %s, %s) RETURNING user_id",
+                    "INSERT INTO users (wallet_address, wallet_seed, total_capital, indicators, weights, created_at) "
+                    "VALUES (%s, %s, %s, %s, %s, NOW()) RETURNING user_id",
                     (wallet_address, hashed_seed, total_capital, Json(default_indicators), Json(default_weights))
                 )
                 user_id = cur.fetchone()[0]
                 conn.commit()
-                logging.info(json.dumps({"event": "user_created", "user_id": user_id}))
+                logging.info(json.dumps({"event": "user_created", "user_id": user_id, "wallet_address": wallet_address}))
                 return user_id
     except Exception as e:
-        logging.error(json.dumps({"event": "create_user_failed", "error": str(e)}))
+        logging.error(json.dumps({"event": "create_user_failed", "wallet_address": wallet_address, "error": str(e)}))
         raise
 
 def create_session(user_id):
@@ -44,6 +45,8 @@ def create_session(user_id):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
+                # Clean up expired sessions for this user
+                cur.execute("DELETE FROM sessions WHERE user_id = %s AND expires_at < NOW()", (user_id,))
                 session_id = str(uuid.uuid4())
                 cur.execute(
                     "INSERT INTO sessions (user_id, session_id, expires_at) "
@@ -52,9 +55,37 @@ def create_session(user_id):
                 )
                 session_id = cur.fetchone()[0]
                 conn.commit()
+                logging.info(json.dumps({"event": "session_created", "user_id": user_id, "session_id": session_id}))
                 return session_id
     except Exception as e:
-        logging.error(json.dumps({"event": "create_session_failed", "error": str(e)}))
+        logging.error(json.dumps({"event": "create_session_failed", "user_id": user_id, "error": str(e)}))
+        raise
+
+def get_user_by_wallet(wallet_address_or_pub_key):
+    """
+    Retrieve user details by wallet address or public key.
+    
+    Args:
+        wallet_address_or_pub_key (str): Wallet address or public key to lookup
+        
+    Returns:
+        dict: User details (e.g., {'id': user_id, 'wallet_address': ..., 'wallet_seed': ...}) or None if not found
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute(
+                    "SELECT user_id, wallet_address, total_capital, indicators, weights "
+                    "FROM users WHERE wallet_address = %s",
+                    (wallet_address_or_pub_key,)
+                )
+                user = cur.fetchone()
+                if user:
+                    user_dict = dict(user)
+                    return user_dict
+                return None
+    except Exception as e:
+        logging.error(json.dumps({"event": "get_user_by_wallet_failed", "wallet_address": wallet_address_or_pub_key, "error": str(e)}))
         raise
 
 def get_user_id_from_session(session_id):
@@ -68,27 +99,21 @@ def get_user_id_from_session(session_id):
                 result = cur.fetchone()
                 return result[0] if result else None
     except Exception as e:
-        logging.error(json.dumps({"event": "get_user_id_failed", "session_id": session_id, "error": str(e)}))
+        logging.error(json.dumps({"event": "get_user_id_from_session_failed", "session_id": session_id, "error": str(e)}))
         raise
 
 def load_users():
     users = {}
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT user_id, wallet_address, wallet_seed, total_capital, paused, indicators, weights, bridged_capital, active_capital FROM users")
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute(
+                    "SELECT user_id, wallet_address, total_capital, paused, indicators, weights, "
+                    "bridged_capital, active_capital, created_at FROM users"
+                )
                 for row in cur.fetchall():
-                    user_id, wallet_address, wallet_seed, total_capital, paused, indicators, weights, bridged_capital, active_capital = row
-                    users[user_id] = {
-                        "wallet_address": wallet_address,
-                        "wallet_seed": wallet_seed.decode('utf-8'),
-                        "total_capital": total_capital,
-                        "paused": paused,
-                        "indicators": indicators,
-                        "weights": weights,
-                        "bridged_capital": bridged_capital,
-                        "active_capital": active_capital
-                    }
+                    user_dict = dict(row)
+                    users[user_dict['user_id']] = user_dict
         return users
     except Exception as e:
         logging.error(json.dumps({"event": "load_users_failed", "error": str(e)}))
@@ -100,8 +125,9 @@ def update_user(user_id, **kwargs):
             with conn.cursor() as cur:
                 fields = {k: Json(v) if isinstance(v, (dict, list)) else v for k, v in kwargs.items()}
                 set_clause = ", ".join(f"{k} = %s" for k in fields.keys())
-                cur.execute(f"UPDATE users SET {set_clause} WHERE user_id = %s", (*fields.values(), user_id))
+                cur.execute(f"UPDATE users SET {set_clause}, updated_at = NOW() WHERE user_id = %s", (*fields.values(), user_id))
                 conn.commit()
+                logging.info(json.dumps({"event": "user_updated", "user_id": user_id}))
     except Exception as e:
         logging.error(json.dumps({"event": "update_user_failed", "user_id": user_id, "error": str(e)}))
         raise
@@ -116,6 +142,7 @@ def add_trade(user_id, token, direction, entry_time, exit_time, profit, entry_pr
                     (user_id, token, direction, entry_time, exit_time, profit, entry_price, exit_price, Json(factor_scores))
                 )
                 conn.commit()
+                logging.info(json.dumps({"event": "trade_added", "user_id": user_id, "token": token}))
     except Exception as e:
         logging.error(json.dumps({"event": "add_trade_failed", "user_id": user_id, "error": str(e)}))
         raise
@@ -123,13 +150,12 @@ def add_trade(user_id, token, direction, entry_time, exit_time, profit, entry_pr
 def get_all_trades(user_id):
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 cur.execute(
                     "SELECT * FROM trades WHERE user_id = %s ORDER BY exit_time DESC",
                     (user_id,)
                 )
-                return [{"trade_id": r[0], "token": r[2], "direction": r[3], "entry_time": r[4], "exit_time": r[5],
-                         "profit": r[6], "entry_price": r[7], "exit_price": r[8], "factor_scores": r[9]} for r in cur.fetchall()]
+                return [dict(row) for row in cur.fetchall()]
     except Exception as e:
         logging.error(json.dumps({"event": "get_all_trades_failed", "user_id": user_id, "error": str(e)}))
         raise
@@ -207,4 +233,15 @@ def get_platform_defaults():
     except Exception as e:
         logging.error(json.dumps({"event": "get_platform_defaults_failed", "error": str(e)}))
         raise
-    
+
+def cleanup_expired_sessions():
+    """Remove all expired sessions from the database."""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM sessions WHERE expires_at < NOW()")
+                conn.commit()
+                logging.info(json.dumps({"event": "expired_sessions_cleaned"}))
+    except Exception as e:
+        logging.error(json.dumps({"event": "cleanup_expired_sessions_failed", "error": str(e)}))
+        raise

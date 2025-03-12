@@ -61,4 +61,47 @@ def signup(signature, nonce, timestamp, get_atom_capital):
     logging.info(json.dumps({"event": "signup_success", "user_id": user_id, "wallet_address": wallet_address, "injective_address": inj_address}))
 
     return session_id, "User created", wallet_address, inj_address, wallet_seed
+
+def login(signature, nonce, timestamp, get_atom_capital):
+    """
+    Authenticate an existing user and create a new session.
     
+    Args:
+        signature (dict): Contains 'signature' and 'pub_key' fields for verification
+        nonce (str): Random string used for signature verification
+        timestamp (str): ISO format timestamp for expiration check
+        get_atom_capital (function): Function to fetch user's ATOM capital
+        
+    Returns:
+        tuple: (session_id, message, wallet_address, inj_address) or (None, error_message)
+    """
+    if not all([signature, nonce, timestamp]):
+        return None, "Missing required fields"
+
+    try:
+        # Verify the signature
+        wallet_address = get_user_by_wallet(signature["pub_key"]["value"])  # Assuming pub_key can be used to lookup user
+        if not wallet_address:
+            return None, "User not found"
+
+        if not verify_signature(wallet_address, signature, nonce, timestamp):
+            return None, "Invalid or expired signature"
+
+        # Derive Injective address
+        inj_address = derive_injective_address(wallet_address)
+
+        # Fetch user details (optional, if needed for additional validation)
+        user = get_user_by_wallet(wallet_address)
+        if not user:
+            return None, "User data not found"
+
+        # Create a new session
+        session_id = create_session(user["id"])
+        logging.info(json.dumps({"event": "login_success", "user_id": user["id"], "wallet_address": wallet_address, "injective_address": inj_address}))
+
+        return session_id, "Login successful", wallet_address, inj_address
+
+    except Exception as e:
+        logging.error(json.dumps({"event": "login_failed", "wallet_address": wallet_address, "error": str(e)}))
+        return None, f"Login failed: {str(e)}"
+        

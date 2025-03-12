@@ -7,7 +7,8 @@ CREATE TABLE users (
     indicators JSONB,
     weights JSONB,
     bridged_capital DECIMAL DEFAULT 0,
-    active_capital DECIMAL DEFAULT 0
+    active_capital DECIMAL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE sessions (
