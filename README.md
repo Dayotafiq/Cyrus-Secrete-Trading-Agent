@@ -183,3 +183,4 @@ A production-ready trading agent for Cosmos ecosystem tokens on Injective future
             "funding": 0.30
             }
         }'
+        
