@@ -1,17 +1,56 @@
 # Cyrus-Secret-Trading-Agent
 
-A production-ready trading agent for Cosmos ecosystem tokens on Injective futures, featuring advanced technical analysis, fundamental analysis, market sentiment, and user management APIs.
+A production-ready trading agent for Cosmos ecosystem tokens on Injective futures, featuring 
+advanced technical analysis, fundamental analysis, market sentiment, and user management APIs.
 
 ## Features
+
 - **Technical Analysis**: ICT, Elliott Wave, EMA, RSI, Wyckoff.
 - **Fundamental Analysis**: Tokenomics, On-chain Activity, Ecosystem Growth, TVL Trends.
 - **Market Sentiment**: Social Volume, Whale Activity, Market Sentiment, Funding Rates.
-- **APIs**: View all trades, manual position closure, PnL, win rate (user/platform), weight updates, trend tracking.
+- **APIs**: View all trades, manual position closure, PnL, win rate (user/platform), weight updates, 
+trend tracking.
 - **Security**: Rate limiting, CORS, encrypted seeds, session expiry.
 - **Account Creation**: Automatically generates Cosmos Hub and Injective accounts.
 
+## Technical Architecture
+
+Cyrus AI is a Python-based application with a PostgreSQL backend, integrating with Injective 
+futures and external APIs for market data. Below is its technical structure:
+
+### Frontend
+
+- Framework: Next.js (inferred from Vercel hosting), providing a web interface for user interaction.
+- Deployment: Hosted on Vercel at https://cyrus-4txqse03a-cenwadikes-projects.vercel.app/.
+- Components: Dashboard for viewing trades, PnL, and managing trading parameters (assumed based on API functionality).
+
+### Backend
+
+- Language: Python 3.12.7 (managed via virtual environment).
+- Core Logic:
+    - Technical analysis (ICT, Elliott Wave, EMA, RSI, Wyckoff) for price predictions.
+    - Fundamental analysis using tokenomics, on-chain data, and TVL trends.
+    - Market sentiment analysis via social volume, whale activity, and funding rates.
+- APIs: Flask-based API (running at http://0.0.0.0:5000) for user management, trade execution, and analytics.
+- Database: PostgreSQL with tables for users, sessions, trades, and platform stats (schema defined in schema.sql).
+- Security: Rate limiting, CORS, encrypted wallet seeds, session-based authentication.
+
+### Blockchain Layer
+
+- Cosmos Hub: Generates user accounts and processes ATOM transactions.
+- Injective: Executes futures trades for Cosmos ecosystem tokens, integrated via API or SDK.
+- Account Management: Automatically creates Cosmos and Injective wallet addresses with encrypted seeds stored in PostgreSQL.
+
+### Data Flow
+
+- User signs signin via the /signup API, generating Cosmos Hub and Injective accounts.
+- Trading logic analyzes market data (technical, fundamental, sentiment) using weights stored in the database.
+- Trades are executed on Injective futures, with details logged in PostgreSQL.
+- The frontend or API provides real-time updates on trades, PnL, and platform stats.
+
 ## Prerequisites
-- **Python 3.9+**
+
+- **Python 3.12.7**
 - **PostgreSQL** with `psql` CLI
 - **API Keys**: X API, Secret AI, CoinGecko (optional)
 
@@ -183,4 +222,52 @@ A production-ready trading agent for Cosmos ecosystem tokens on Injective future
             "funding": 0.30
             }
         }'
-        
+
+## Future Plans and Roadmap
+
+Cyrus AI is poised for growth as a leading trading agent within the Cosmos ecosystem, 
+with plans to enhance functionality and adoption:
+
+### Short-Term (Post-Hackathon, Q2 2025)
+
+- Testing: Validate trading strategies and security features on Injective testnet.
+- Documentation: Expand API docs and provide user guides for setup and trading.
+
+### Medium-Term (Q3-Q4 2025)
+
+- Advanced Analytics: Add real-time charting and predictive models for technical indicators.
+- Multi-Chain Support: Extend trading to other Cosmos-based DEXs or futures platforms via IBC.
+- Mobile Access: Develop a mobile app or responsive UI for on-the-go trading.
+
+### Long-Term (2026 and Beyond)
+- AI Optimization: Train machine learning models to refine trading weights dynamically.
+- Governance: Introduce a token for platform governance and profit-sharing.
+- Ecosystem Integration: Partner with Cosmos projects to list additional tokens and enhance 
+liquidity.
+
+## How it Leverages Cosmos Technologies
+
+Cyrus AI integrates with the Cosmos ecosystem by leveraging Cosmos Hub accounts and Injective, a 
+Cosmos-based DeFi platform, while focusing on Cosmos ecosystem tokens:
+
+1. Cosmos Hub (ATOM and Accounts)
+- Use Case: Generates user accounts and potentially uses ATOM for fees or bridging capital to 
+Injective.
+- Implementation: Signup API creates Cosmos Hub addresses, storing encrypted seeds for user 
+access.
+- Benefit: Ties Cyrus AI to the Cosmos ecosystem, enabling seamless account management and token 
+interactions.
+
+2. Injective (Cosmos-Based DeFi Platform)
+- Use Case: Executes futures trades for Cosmos ecosystem tokens.
+- Implementation: Integrates with Injective’s SDK to place and manage trades.
+- Benefit: Utilizes Injective’s high-performance trading capabilities within the Cosmos ecosystem.
+
+## Conclusion
+
+Cyrus AI delivers a sophisticated trading agent for Cosmos ecosystem tokens on Injective futures, 
+blending advanced analytics with user-friendly APIs. By leveraging Cosmos Hub accounts and 
+Injective’s infrastructure, it bridges traditional trading strategies with decentralized finance. 
+We’re excited to evolve this project and invite the Naija HackATOM community to contribute!
+
+Explore the project at https://github.com/Dayotafiq/Cyrus-Secrete-Trading-Agent or try the demo at https://cyrus-4txqse03a-cenwadikes-projects.vercel.app/.
