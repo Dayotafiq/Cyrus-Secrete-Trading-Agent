@@ -183,4 +183,52 @@ A production-ready trading agent for Cosmos ecosystem tokens on Injective future
             "funding": 0.30
             }
         }'
-        
+
+## Future Plans and Roadmap
+
+Cyrus AI is poised for growth as a leading trading agent within the Cosmos ecosystem, 
+with plans to enhance functionality and adoption:
+
+### Short-Term (Post-Hackathon, Q2 2025)
+
+- Testing: Validate trading strategies and security features on Injective testnet.
+- Documentation: Expand API docs and provide user guides for setup and trading.
+
+### Medium-Term (Q3-Q4 2025)
+
+- Advanced Analytics: Add real-time charting and predictive models for technical indicators.
+- Multi-Chain Support: Extend trading to other Cosmos-based DEXs or futures platforms via IBC.
+- Mobile Access: Develop a mobile app or responsive UI for on-the-go trading.
+
+### Long-Term (2026 and Beyond)
+- AI Optimization: Train machine learning models to refine trading weights dynamically.
+- Governance: Introduce a token for platform governance and profit-sharing.
+- Ecosystem Integration: Partner with Cosmos projects to list additional tokens and enhance 
+liquidity.
+
+## How it Leverages Cosmos Technologies
+
+Cyrus AI integrates with the Cosmos ecosystem by leveraging Cosmos Hub accounts and Injective, a 
+Cosmos-based DeFi platform, while focusing on Cosmos ecosystem tokens:
+
+1. Cosmos Hub (ATOM and Accounts)
+- Use Case: Generates user accounts and potentially uses ATOM for fees or bridging capital to 
+Injective.
+- Implementation: Signup API creates Cosmos Hub addresses, storing encrypted seeds for user 
+access.
+- Benefit: Ties Cyrus AI to the Cosmos ecosystem, enabling seamless account management and token 
+interactions.
+
+2. Injective (Cosmos-Based DeFi Platform)
+- Use Case: Executes futures trades for Cosmos ecosystem tokens.
+- Implementation: Integrates with Injective’s SDK to place and manage trades.
+- Benefit: Utilizes Injective’s high-performance trading capabilities within the Cosmos ecosystem.
+
+## Conclusion
+
+Cyrus AI delivers a sophisticated trading agent for Cosmos ecosystem tokens on Injective futures, 
+blending advanced analytics with user-friendly APIs. By leveraging Cosmos Hub accounts and 
+Injective’s infrastructure, it bridges traditional trading strategies with decentralized finance. 
+We’re excited to evolve this project and invite the Naija HackATOM community to contribute!
+
+Explore the project at https://github.com/cenwadike/Cyrus-Secrete-Trading-Agent or try the demo at https://cyrus-4txqse03a-cenwadikes-projects.vercel.app/.
