@@ -231,4 +231,4 @@ blending advanced analytics with user-friendly APIs. By leveraging Cosmos Hub ac
 Injective’s infrastructure, it bridges traditional trading strategies with decentralized finance. 
 We’re excited to evolve this project and invite the Naija HackATOM community to contribute!
 
-Explore the project at https://github.com/cenwadike/Cyrus-Secrete-Trading-Agent or try the demo at https://cyrus-4txqse03a-cenwadikes-projects.vercel.app/.
+Explore the project at https://github.com/Dayotafiq/Cyrus-Secrete-Trading-Agent or try the demo at https://cyrus-4txqse03a-cenwadikes-projects.vercel.app/.
